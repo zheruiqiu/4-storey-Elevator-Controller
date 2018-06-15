@@ -47,10 +47,10 @@ StOpen(opendoor)     : 开始开门(开门指令)
 delay(delay)         :延迟关门
 */
 	input CP,StOpen,delay;
-	output reg [4:0] count;
+	output reg [6:0] count;
 	output reg endOpen;  //Is this Reg?
 	output reg [1:0] dispStage=2'b00;
-	reg endTime = 7'b0010101;
+	reg [6:0] endTime = 7'b0010101;
 	always @ (posedge CP)
 		if(!StOpen) begin count <= 7'b0000000;endOpen<=0; end
 		else
@@ -63,8 +63,8 @@ delay(delay)         :延迟关门
 				if (count == 7'd1)dispStage<=2'b01;
 				else if (count == 7'd2)dispStage<=2'b10;
 				else if (count == 7'd3)dispStage<=2'b11;
-				else if (count == endTime-2)dispStage<=2'b10;
-				else if (count == endTime-1)dispStage<=2'b01;
+				else if (count == endTime-7'b0000010)dispStage<=2'b10;
+				else if (count == endTime-7'b0000001)dispStage<=2'b01;
 				else dispStage<=2'b00;
 				end
 			end

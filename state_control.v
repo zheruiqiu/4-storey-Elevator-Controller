@@ -18,7 +18,7 @@ DoorCount  : 门控计时
 
 input clk,switch,endRun,endOpen;
 input [3:0] allReq_reg;
-input [4:0] DoorCount;
+input [6:0] DoorCount;
 input up_need,down_need;
 output reg [1:0] ud_mode;
 output reg [2:0] state;//000_stop,001_pause,010_move
