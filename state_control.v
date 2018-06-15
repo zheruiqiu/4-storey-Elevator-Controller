@@ -44,7 +44,7 @@ always @(posedge clk)
             3'b000:state[2:0]=3'b001;    // 总开关开启后，电梯进入暂停状态
             3'b001:                       // 电梯处于暂停状态时
                 begin
-                    if(&(allReq_reg & position)==1)            // 如果此层需要停靠
+                    if(|(allReq_reg & position)==1)            // 如果此层需要停靠
                     begin
                         opendoor=1'b1;                        // 开门计时开始
                     end
@@ -66,8 +66,15 @@ always @(posedge clk)
                     if(endRun==1)       // 如果运行完毕
                         begin             // 如果处于上升模式，楼层上升；反之，下降
                             mv2nxt=0;    // 运行计时清零
-                            if(ud_mode==2'b01) begin position=position<<1;state=3'b001;end
-                            else begin position=position>>1;state=3'b001;end  //if(&(allReq_reg & position)==1)
+                            if(ud_mode==2'b01) 
+							begin 
+							position=position<<1;
+							state=3'b001;
+							end
+                            else begin 
+							position=position>>1;
+							state=3'b001;
+							end  //if(&(allReq_reg & position)==1)
                         end
                 end
             endcase
