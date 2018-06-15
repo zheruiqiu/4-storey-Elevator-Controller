@@ -12,7 +12,7 @@ StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
 */
 	input CP,CP_H,StRun;
 	output reg [2:0] count;
-	output reg endRun; //Is this Reg?
+	output reg endRun;
 	always @ (posedge CP)
 		if(!StRun) begin count <= 3'b000; end
 		else
@@ -44,11 +44,11 @@ endOpen(endOpen)     : 开门完毕
 输入列表
 CP(clk4hz)           : 时钟(低频时钟)
 StOpen(opendoor)     : 开始开门(开门指令)
-delay(delay)         :延迟关门
+delay(delay)         : 延迟关门
 */
 	input CP,StOpen,delay;
 	output reg [6:0] count;
-	output reg endOpen;  //Is this Reg?
+	output reg endOpen;
 	output reg [1:0] dispStage=2'b00;
 	reg [6:0] endTime = 7'b0010101;
 	always @ (posedge CP)
@@ -69,7 +69,9 @@ delay(delay)         :延迟关门
 				end
 			end
 	always@(posedge delay)
-		endTime<=endTime+5'd20;
+		begin
+		endTime=endTime+5'd20;
+		end
 endmodule
 
 //分频器

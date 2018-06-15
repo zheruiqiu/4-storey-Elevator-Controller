@@ -32,31 +32,30 @@ output reg down_need=1'd0;
 
 always @(posedge clk)                                  // 上升沿触发
 begin
-    
-    #5 upReq_reg    <= upReq_reg    & (~position);     // 取消已到达楼层的请求
-    #5 downReq_reg  <= downReq_reg  & (~position);
-    #5 inEleReq_reg <= inEleReq_reg & (~position);
+    upReq_reg    <= upReq_reg    & (~position);     // 取消已到达楼层的请求
+    downReq_reg  <= downReq_reg  & (~position);
+    inEleReq_reg <= inEleReq_reg & (~position);
 	allReq_reg = upReq_reg | downReq_reg | inEleReq_reg;
 	if (allReq_reg==4'b0000) begin up_need<=1'b0; down_need<=1'b0; end
     if(ud_mode==2'b01 && (position<upReq || position<downReq || position<inEleReq))
         begin                                          // 上升过程中，仅响应上方的请求
-            upReq_reg<=upReq;
-            downReq_reg<=downReq;
-            inEleReq_reg<=inEleReq;
+            upReq_reg<=upReq | upReq_reg;
+            downReq_reg<=downReq | downReq_reg;
+            inEleReq_reg<=inEleReq | inEleReq_reg;
             up_need<=1'b1;                             //上方存在有效请求，则有上升需求
         end
-    else if(ud_mode==2'b10 && (position>upReq || position>downReq || position>inEleReq))
+    else if(ud_mode==2'b10 && (position>upReq || position>downReq || position>inEleReq) && (|(upReq|downReq|inEleReq)))
         begin                                          // 下降过程中，仅响应下方的请求
-            upReq_reg<=upReq;
-            downReq_reg<=downReq;
-            inEleReq_reg<=inEleReq;
+            upReq_reg<=upReq | upReq_reg;
+            downReq_reg<=downReq | downReq_reg;
+            inEleReq_reg<=inEleReq | inEleReq_reg;
             down_need<=1'b1;                           //下方存在有效请求，则有下降需求
         end
     else if(ud_mode==2'b00)
         begin                                          // 停止过程中，响应第一个请求
-            upReq_reg<=upReq;
-            downReq_reg<=downReq;
-            inEleReq_reg<=inEleReq;
+            upReq_reg<=upReq | upReq_reg;
+            downReq_reg<=downReq | downReq_reg;
+            inEleReq_reg<=inEleReq | inEleReq_reg;
             #7  if (position<allReq_reg && allReq_reg!=4'b0000) up_need<=1;          //上方存在有效请求，则有上升需求
                 else if (position>allReq_reg && allReq_reg!=4'b0000) down_need<=1;   //下方存在有效请求，则有下降需求
     end

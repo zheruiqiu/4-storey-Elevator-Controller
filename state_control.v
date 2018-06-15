@@ -48,7 +48,7 @@ always @(posedge clk)
                     begin
                         opendoor=1'b1;                        // 开门计时开始
                     end
-                    else if ((up_need | down_need)==1)          // 如果此层不需要停靠,先检查是否需要移动
+                    else if ((up_need | down_need)==1 && opendoor!=1'b1)    // 如果此层不需要停靠,先检查是否需要移动
                     begin
                         mv2nxt=1;
                         state=3'b010;            //转入移动状态
@@ -59,6 +59,7 @@ always @(posedge clk)
                         opendoor=0;                           // 开门计时清零
                         mv2nxt=1;
                         if (ud_mode!=2'b00) state=3'b010;
+						else mv2nxt=0;
                     end
                 end
             3'b010:                       // 电梯处于移动状态时
