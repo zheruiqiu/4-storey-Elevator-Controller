@@ -35,7 +35,7 @@ endmodule
 
 //开门计时器
 //counter_open open_Timer(dispStage,DoorCount,endOpen,clk4hz,opendoor,delay);
-module counter_open(dispStage,count,endOpen,CP,StOpen,delay,close);
+
 /*
 输出列表
 dispStage(dispStage) : 显示状态
@@ -46,7 +46,8 @@ CP(clk4hz)           : 时钟(低频时钟)
 StOpen(opendoor)     : 开始开门(开门指令)
 delay(delay)         : 延迟关门
 */
-	input CP,StOpen,delay,close;
+module counter_open(dispStage,count,endOpen,CP,StOpen,pause,close);
+	input CP,StOpen,pause,close;
 	output reg [6:0] count;
 	output reg endOpen;
 	output reg [1:0] dispStage=2'b00;
@@ -58,6 +59,7 @@ delay(delay)         : 延迟关门
 			if(count == endTime)
 				begin count<=7'd0;endOpen<=1;dispStage<=2'b00; end
 			else if (close)count = endTime-7'b0000011;
+            else if (pause)endTime <= endTime;
 			else
 				begin 
 				count<=count+1'd1;endOpen<=0;
@@ -69,10 +71,22 @@ delay(delay)         : 延迟关门
 				//else dispStage<=2'b00;
 				end
 			end
-	always@(posedge delay)
-		begin
-		endTime=endTime+5'd20;
-		end
+endmodule
+
+module delaybutton(pause,counter,delay_reg,CP,delay);
+input delay,CP;
+output reg pause=0;
+output reg delay_reg=0;
+output reg [6:0] counter;
+parameter conuntEnd = 7'd20;
+always @ (posedge CP)
+	begin
+		delay_reg <= delay|delay_reg;
+		if(!delay_reg) begin counter<=7'd0;pause<=0;end
+		else if (delay == delay_reg) begin counter<=7'd0;pause<=1;end
+		else if (counter==conuntEnd) begin counter<=7'd0;delay_reg<=0;pause<=1'b0;end
+		else begin counter<=counter+1'b1;pause<=1;end
+	end
 endmodule
 
 //分频器
