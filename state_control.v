@@ -11,7 +11,7 @@ module state_control(opendoor,mv2nxt,ud_mode,state,position,clk,switch,allReq_re
 ** 输入列表
 ** clk(clk32Hz)           : 时钟(高频时钟)
 ** switch(switch)         : 电梯总开关
-** allReq_reg(allReq_reg) : 所有有效请求
+** allReq_reg(allReq_reg) : 当前有效请求
 ** endRun(endRun)         : 移动完毕
 ** endOpen(endOpen)       : 开门完毕
 ** up_need(up_need)       : 上升需求
