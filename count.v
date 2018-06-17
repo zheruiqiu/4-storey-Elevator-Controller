@@ -1,18 +1,19 @@
-//楼层转换计时器
-//counter_run run_Timer(RunCount,endRun,clk4hz,clk32hz,mv2nxt);
+// 楼层转换计时器
+// counter_run run_Timer(RunCount,endRun,clk4hz,clk32hz,mv2nxt);
 module counter_run(count,endRun,CP,CP_H,StRun);
 /*
-输出列表
-count(RunCount) : 计数器(运行计数)
-endRun(endRun)  : 运行完毕
-输入列表
-CP(clk4hz)      : 时钟(低频时钟)
-CP_H
-StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
+** 输出列表
+** count(RunCount) : 计数器(运行计数)
+** endRun(endRun)  : 运行完毕信号
+** 输入列表
+** CP(clk4hz)      : 时钟(低频时钟)
+** CP_H(clk32hz)   : 时钟(高频时钟)
+** StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
 */
 	input CP,CP_H,StRun;
 	output reg [2:0] count;
 	output reg endRun;
+	
 	always @ (posedge CP)
 		if(!StRun) begin count <= 3'b000; end
 		else
@@ -31,27 +32,29 @@ StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
 			else
 				begin endRun<=0; end
 			end
+			
 endmodule
 
-//开门计时器
-//counter_open open_Timer(dispStage,DoorCount,endOpen,clk4hz,opendoor,delay);
-
-/*
-输出列表
-dispStage(dispStage) : 显示状态
-count(DoorCount)     : 计数器(开门计数)
-endOpen(endOpen)     : 开门完毕
-输入列表
-CP(clk4hz)           : 时钟(低频时钟)
-StOpen(opendoor)     : 开始开门(开门指令)
-delay(delay)         : 延迟关门
-*/
+// 开门计时器
+// counter_open open_Timer(dispStage,DoorCount,endOpen,clk4hz,opendoor,pause,close);
 module counter_open(dispStage,count,endOpen,CP,StOpen,pause,close);
+/*
+** 输出列表
+** dispStage(dispStage) : 显示状态
+** count(DoorCount)     : 计数器(开门计数)
+** endOpen(endOpen)     : 开门完毕
+** 输入列表
+** CP(clk4hz)           : 时钟(低频时钟)
+** StOpen(opendoor)     : 开始开门(开门指令)
+** pause(pause)         : 暂停关门信号
+** close(close)         : 提前关门
+*/
 	input CP,StOpen,pause,close;
 	output reg [6:0] count;
 	output reg endOpen;
 	output reg [1:0] dispStage=2'b00;
 	reg [6:0] endTime = 7'b0010101;
+
 	always @ (posedge CP)
 		if(!StOpen) begin count <= 7'b0000000;endOpen<=0;dispStage<=2'b00; end
 		else
@@ -68,17 +71,29 @@ module counter_open(dispStage,count,endOpen,CP,StOpen,pause,close);
 				else if (count == 7'd3)dispStage<=2'b11;
 				else if (count == endTime-7'b0000010)dispStage<=2'b10;
 				else if (count == endTime-7'b0000001)dispStage<=2'b01;
-				//else dispStage<=2'b00;
 				end
 			end
+
 endmodule
 
+// 延迟关门按钮
+// delaybutton delaybutton0(pause,counter,delay_reg,clk4hz,delay)
 module delaybutton(pause,counter,delay_reg,CP,delay);
+/*
+** 输出列表
+** pause(pause)         : 暂停关门信号
+** counter(counter)     : (延迟关门按钮内的)计数器
+** delay_reg(delay_reg) : 延迟关门信号寄存器
+** 输入列表
+** CP(clk4hz)           : 时钟(低频时钟)
+** delay(delay)         : 延迟关门信号
+*/
 input delay,CP;
 output reg pause=0;
 output reg delay_reg=0;
 output reg [6:0] counter;
 parameter conuntEnd = 7'd20;
+
 always @ (posedge CP)
 	begin
 		delay_reg <= delay|delay_reg;
@@ -87,16 +102,19 @@ always @ (posedge CP)
 		else if (counter==conuntEnd) begin counter<=7'd0;delay_reg<=0;pause<=1'b0;end
 		else begin counter<=counter+1'b1;pause<=1;end
 	end
+
 endmodule
 
-//分频器
-//divideclk divideclk0(clk4hz,clk32hz);
+// 分频器
+// divideclk divideclk0(clk4hz,clk32hz,mv2nxt,opendoor);
 module divideclk(clk4hz,clk32hz,StRun,StOpen);
 /*
-输出列表
-clk4hz(clk4hz)   : 低频时钟
-输入列表
-clk32hz(clk32hz) : 高频时钟
+** 输出列表
+** clk4hz(clk4hz)   : 低频时钟
+** 输入列表
+** clk32hz(clk32hz) : 高频时钟
+** StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
+** StOpen(opendoor)     : 开始开门(开门指令)
 */
 input clk32hz,StRun,StOpen;
 output reg clk4hz;
@@ -108,4 +126,5 @@ always @(posedge clk32hz)
 		else if (count==3'b111) begin clk4hz<=1'b1;count<=3'b000;end
 		else begin clk4hz<=1'b0 ;count<=count+1'b1;end
 	end
+
 endmodule
