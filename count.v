@@ -1,6 +1,6 @@
 // 楼层转换计时器
-// counter_run run_Timer(RunCount,endRun,clk4hz,clk32hz,mv2nxt);
-module counter_run(count,endRun,CP,CP_H,StRun);
+// counter_run run_Timer(endRun,clk4hz,clk32hz,mv2nxt);
+module counter_run(endRun,CP,CP_H,StRun);
 /*
 ** 输出列表
 ** count(RunCount) : 计数器(运行计数)
@@ -10,9 +10,9 @@ module counter_run(count,endRun,CP,CP_H,StRun);
 ** CP_H(clk32hz)   : 时钟(高频时钟)
 ** StRun(mv2nxt)   : 开始运行(移动指令)  move to next floor
 */
-	input CP,CP_H,StRun;
-	output reg [2:0] count;
+	input CP,CP_H,StRun;	
 	output reg endRun;
+	reg [2:0] count;
 	
 	always @ (posedge CP)
 		if(!StRun) begin count <= 3'b000; end
@@ -36,23 +36,22 @@ module counter_run(count,endRun,CP,CP_H,StRun);
 endmodule
 
 // 开门计时器
-// counter_open open_Timer(dispStage,DoorCount,endOpen,clk4hz,opendoor,pause,close);
-module counter_open(dispStage,count,endOpen,CP,StOpen,pause,close);
+// counter_open open_Timer(dispStage,endOpen,clk4hz,opendoor,pause,close);
+module counter_open(endOpen,dispStage,CP,StOpen,pause,close);
 /*
 ** 输出列表
-** dispStage(dispStage) : 显示状态
-** count(DoorCount)     : 计数器(开门计数)
 ** endOpen(endOpen)     : 开门完毕
+** dispStage(dispStage) : 显示状态
 ** 输入列表
 ** CP(clk4hz)           : 时钟(低频时钟)
 ** StOpen(opendoor)     : 开始开门(开门指令)
 ** pause(pause)         : 暂停关门信号
 ** close(close)         : 提前关门
 */
-	input CP,StOpen,pause,close;
-	output reg [6:0] count;
+	input CP,StOpen,pause,close;	
 	output reg endOpen;
 	output reg [1:0] dispStage=2'b00;
+	reg [6:0] count;
 	reg [6:0] endTime = 7'b0010101;
 
 	always @ (posedge CP)
@@ -77,21 +76,19 @@ module counter_open(dispStage,count,endOpen,CP,StOpen,pause,close);
 endmodule
 
 // 延迟关门按钮
-// delaybutton delaybutton0(pause,counter,delay_reg,clk4hz,delay)
-module delaybutton(pause,counter,delay_reg,CP,delay);
+// delaybutton delaybutton0(pause,clk4hz,delay)
+module delaybutton(pause,CP,delay);
 /*
 ** 输出列表
 ** pause(pause)         : 暂停关门信号
-** counter(counter)     : (延迟关门按钮内的)计数器
-** delay_reg(delay_reg) : 延迟关门信号寄存器
 ** 输入列表
 ** CP(clk4hz)           : 时钟(低频时钟)
 ** delay(delay)         : 延迟关门信号
 */
 input delay,CP;
 output reg pause=0;
-output reg delay_reg=0;
-output reg [6:0] counter;
+reg delay_reg=0;
+reg [6:0] counter;
 parameter conuntEnd = 7'd20;
 
 always @ (posedge CP)
