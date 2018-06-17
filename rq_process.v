@@ -59,3 +59,14 @@ always @(posedge clk)                              // 上升沿触发
     end
 
 endmodule
+
+// 电梯外请求对外接口
+
+module rq_interface(upReq,downReq,upInput,downInput);
+input [2:0] upInput,downInput;
+output [3:0] upReq,downReq;
+
+assign upReq = {1'b0,upInput};
+assign downReq = {downInput,1'b0};
+
+endmodule

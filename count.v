@@ -96,10 +96,10 @@ parameter conuntEnd = 7'd20;
 
 always @ (posedge CP)
 	begin
-		delay_reg <= delay|delay_reg;
+		delay_reg <= delay|delay_reg;                      // 延迟信号进入寄存器
 		if(!delay_reg) begin counter<=7'd0;pause<=0;end
-		else if (delay == delay_reg) begin counter<=7'd0;pause<=1;end
-		else if (counter==conuntEnd) begin counter<=7'd0;delay_reg<=0;pause<=1'b0;end
+		else if (delay == delay_reg) begin counter<=counter+1'b1;pause<=1;end  // 自按键开始时进行计时
+		else if (counter==conuntEnd) begin counter<=7'd0;delay_reg<=0;pause<=1'b0;end // 计时结束时计数器归零，取消延迟
 		else begin counter<=counter+1'b1;pause<=1;end
 	end
 
