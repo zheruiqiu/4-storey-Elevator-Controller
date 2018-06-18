@@ -110,3 +110,101 @@ always @(posedge clk)                              // 上升沿触发
     end
 
 endmodule
+
+
+/*
+上升模式时，应当先响应所有的上方的上升或停靠请求，如果没有，响应上方的下降请求
+当所有的上方的上升或停靠请求相应结束后，转入暂停模式
+*/
+always @(posedge clk)         // 上升沿触发
+    begin
+		upReq_reg<=upReq | upReq_reg;     
+        downReq_reg<=downReq | downReq_reg; 
+        inEleReq_reg<=inEleReq | inEleReq_reg;
+		
+	    if (allReq_reg==4'b0000) begin up_need<=1'b0; down_need<=1'b0; end
+
+		if (ud_mode==2'b01)
+		begin
+			if (flag &&(downReq_reg != downReq_reg & (~position)))
+			begin downReq_reg  <= downReq_reg  & (~position);flag<=0;end
+			upReq_reg    <= upReq_reg    & (~position);    // 取消已到达楼层的请求
+			inEleReq_reg <= inEleReq_reg & (~position);
+			
+        	if (((~(position-4'b0001)) & (upReq_reg | inEleReq_reg))!=4'b0000) 
+			begin
+				allReq_reg = (~(position-4'b0001)) & (upReq_reg | inEleReq_reg);
+				up_need<=1'b1;        // 上方存在有效请求，则有上升需求
+			end
+			else if (((~(position-4'b0001)) & downReq_reg) != 4'b0000) 
+			begin allReq_reg =(~(position-4'b0001)) & downReq_reg;up_need<=1'b1; flag<=1;end
+			else allReq_reg = 4'b0000;
+		end
+		else if (ud_mode==2'b10)
+		begin
+			if (flag &&(upReq_reg != upReq_reg & (~position)))
+			begin upReq_reg  <= upReq_reg  & (~position);flag<=0;end
+			downReq_reg  <= downReq_reg  & (~position);    // 取消已到达楼层的请求
+			inEleReq_reg <= inEleReq_reg & (~position);
+			
+        	if (((~((position-4'b0001)|position))&(downReq_reg | inEleReq_reg))!=4'b0000)
+			begin 
+				allReq_reg = (~((position-4'b0001)|position)) & (downReq_reg | inEleReq_reg);
+			 	down_need<=1'b1;      // 下方存在有效请求，则有下降需求
+			end
+			else if((~((position-4'b0001)|position)) & upReq_reg != 4'b0000)
+			begin allReq_reg =(~((position-4'b0001)|position)) & upReq_reg;down_need<=1'b1; flag<=1;end
+			else allReq_reg = 4'b0000;
+		end
+        else if(ud_mode==2'b00)
+        begin                                              // 停止过程中，响应第一个请求
+            allReq_reg = upReq_reg | downReq_reg | inEleReq_reg;
+            if (position<allReq_reg && allReq_reg!=4'b0000) up_need<=1;         // 上方存在有效请求，则有上升需求
+            else if (position>allReq_reg && allReq_reg!=4'b0000) down_need<=1;  // 下方存在有效请求，则有下降需求
+        end
+    end
+
+
+	always @(posedge clk)         // 上升沿触发
+    begin
+		if(&(4'b1000 | downReq_reg)==1) hst_down = 4'b1000;
+		else if(&(4'b0100 | downReq_reg)==1) hst_down = 4'b0100;
+		else if(&(4'b0010 | downReq_reg)==1) hst_down = 4'b0010;
+		else hst_down = 4'b0000;
+		if(&(4'b0001 | upReq_reg)==1) lst_up = 4'b0001;
+		else if(&(4'b0010 | upReq_reg)==1) lst_up = 4'b0010;
+		else if(&(4'b0100 | upReq_reg)==1) lst_up = 4'b0100;
+		else lst_up = 4'b0000;
+
+		if (allReq_reg==4'b0000) ud_mode<=2'b00;
+		upReq_reg<=upReq | upReq_reg;     
+        downReq_reg<=downReq | downReq_reg; 
+        inEleReq_reg<=inEleReq | inEleReq_reg;
+
+		if (ud_mode==2'b00)
+		begin
+			allReq_reg = upReq_reg|downReq_reg|inEleReq_reg;
+			if (position<allReq_reg && allReq_reg!=4'b0000) ud_mode<=2'b01;         // 上方存在有效请求，则有上升需求
+            else if (position>allReq_reg && allReq_reg!=4'b0000) ud_mode<=2'b10;  // 下方存在有效请求，则有下降需求
+		end
+		if (ud_mode==2'b01)
+		begin
+			upReq_reg    <= upReq_reg    & (~position);    // 取消已到达楼层的请求
+			inEleReq_reg <= inEleReq_reg & (~position);
+			if (position==hst_down) downReq_reg  <= downReq_reg  & (~position);
+			eff_req = ((~(position-4'b0001)) & (upReq_reg | inEleReq_reg));
+			if (hst_down>upReq_reg) eff_req = hst_down | eff_req;
+			if (eff_req != 4'b0000) ud_mode = 2'b01;
+			else ud_mode = 2'b00;
+		end
+		if (ud_mode==2'b10)
+		begin
+			downReq_reg  <= downReq_reg  & (~position);    // 取消已到达楼层的请求
+			inEleReq_reg <= inEleReq_reg & (~position);
+			if (position==lst_up) upReq_reg    <= upReq_reg    & (~position);
+			eff_req = (~((position-4'b0001)|position)) & (downReq_reg | inEleReq_reg);
+			if (lst_up<downReq_reg) eff_req = lst_up | eff_req;
+			if (eff_req != 4'b0000) ud_mode = 2'b10;
+			else ud_mode = 2'b00;
+		end
+	end
