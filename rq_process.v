@@ -40,47 +40,47 @@ always @(posedge clk)         // 上升沿触发
 		else if(|(4'b0100 & upReq_reg)==1) lst_up = 4'b0100;
 		else lst_up = 4'b0000;
 
-		upReq_reg<=upReq | upReq_reg;     
-        downReq_reg<=downReq | downReq_reg; 
-        inEleReq_reg<=inEleReq | inEleReq_reg;
+		upReq_reg=upReq | upReq_reg;     
+        downReq_reg=downReq | downReq_reg; 
+        inEleReq_reg=inEleReq | inEleReq_reg;
 		allReq_reg = upReq_reg|downReq_reg|inEleReq_reg;
-		if (allReq_reg==4'b0000) ud_mode<=2'b00;
+		if (allReq_reg==4'b0000) ud_mode=2'b00;
 
 		if (ud_mode==2'b00)
 		begin
 			allReq_reg = upReq_reg|downReq_reg|inEleReq_reg;
-			if (position<allReq_reg && allReq_reg!=4'b0000) ud_mode<=2'b01;         // 上方存在有效请求，则有上升需求
-            else if (position>allReq_reg && allReq_reg!=4'b0000) ud_mode<=2'b10;  // 下方存在有效请求，则有下降需求
+			if (position<allReq_reg && allReq_reg!=4'b0000) ud_mode=2'b01;         // 上方存在有效请求，则有上升需求
+            else if (position>allReq_reg && allReq_reg!=4'b0000) ud_mode=2'b10;  // 下方存在有效请求，则有下降需求
 		end
 		if (ud_mode==2'b01)
 		begin
-			upReq_reg    <= upReq_reg    & (~position);    // 取消已到达楼层的请求
-			inEleReq_reg <= inEleReq_reg & (~position);
+			upReq_reg    = upReq_reg    & (~position);    // 取消已到达楼层的请求
+			inEleReq_reg = inEleReq_reg & (~position);
 			if (position==hst_down && hst_down>upReq_reg) 
 			begin				
-				downReq_reg  <= downReq_reg & (~position);
-				ud_mode<=2'b00;
+				downReq_reg  = downReq_reg & (~position);
+				ud_mode=2'b00;
 			end
 			eff_req = ((~(position-4'b0001)) & (upReq_reg | inEleReq_reg));
 			if (hst_down>upReq_reg) eff_req = hst_down | eff_req;
-			if (eff_req != 4'b0000) ud_mode <= 2'b01;
-			else ud_mode <= 2'b00;
+			if (eff_req != 4'b0000) ud_mode = 2'b01;
+			else ud_mode = 2'b00;
 		end
 		if (ud_mode==2'b10)
 		begin
-			downReq_reg  <= downReq_reg  & (~position);    // 取消已到达楼层的请求
-			inEleReq_reg <= inEleReq_reg & (~position);
+				downReq_reg  = (downReq_reg  & (~position));    // 取消已到达楼层的请求
+				inEleReq_reg = (inEleReq_reg & (~position));
 			if (position==lst_up && (lst_up<downReq_reg || downReq_reg==4'b0000))
 			begin
-				upReq_reg <= upReq_reg & (~position);
-				ud_mode<=2'b00;
+				upReq_reg = upReq_reg & (~position);
+				ud_mode=2'b00;
 			end
 			else
 			begin
 				eff_req = ((position-4'b0001) & (downReq_reg | inEleReq_reg));
 				if (lst_up<downReq_reg || downReq_reg==4'b0000) eff_req = lst_up | eff_req;
-				if (eff_req != 4'b0000) ud_mode <= 2'b10;
-				else ud_mode <= 2'b00;
+				if (eff_req != 4'b0000) ud_mode = 2'b10;
+				else ud_mode = 2'b00;
 			end
 		end
 	end
