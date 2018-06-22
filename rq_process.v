@@ -1,22 +1,20 @@
 // 请求处理模块
-// rq_process rq_process0(allReq_reg,up_need,down_need,clk32hz,upReq,downReq,inEleReq,position,ud_mode)
+// rq_process rq_process0(eff_req,ud_mode,clk32hz,upReq,downReq,inEleReq,position)
 module rq_process(eff_req,ud_mode,clk,upReq,downReq,inEleReq,position);
 /*
 ** 输出列表
-** inEleReq_reg : 有效梯内请求
-** up_need      : 上升需求
-** down_need    : 下降需求
+** eff_req      : 当前有效梯内请求
+** ud_mode      : 运行模式(00_停止,01_上升,10_下降)
 ** 输入列表
 ** clk(clk32hz) : 高频32Hz时钟
 ** upReq        : 上升请求按键
 ** downReq      : 下降请求按键
 ** inEleReq     : 梯内请求按键
 ** position     : 电梯所在位置
-** ud_mode      : 运行模式(00_停止,01_上升,10_下降)
 */
 input clk;
-output reg [1:0] ud_mode; //00_no require,01_up mode,10_down mode
 input [3:0] upReq,downReq,inEleReq,position;
+output reg [1:0] ud_mode; //00_no require,01_up mode,10_down mode
 output reg [3:0] eff_req;
 reg [3:0] upReq_reg=4'd0;
 reg [3:0] downReq_reg=4'd0;
@@ -83,7 +81,7 @@ always @(posedge clk)         // 上升沿触发
 
 endmodule
 
-// 电梯外请求对外接口
+// 电梯外请求接口
 // rq_interface rq_interface0(upReq,downReq,upInput,downInput);
 module rq_interface(upReq,downReq,upInput,downInput);
 /*

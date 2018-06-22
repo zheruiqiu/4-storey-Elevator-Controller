@@ -1,5 +1,5 @@
 // 状态控制模块
-// state_control state_control0(opendoor,mv2nxt,state,position,ud_mode,clk32Hz,switch,allReq_reg,up_need,down_need,endRun,endOpen)
+// state_control state_control0(opendoor,mv2nxt,state,position,clk32Hz,switch,eff_req,ud_mode,endRun,endOpen)
 module state_control(opendoor,mv2nxt,state,position,clk,switch,eff_req,ud_mode,endRun,endOpen);
 /*
 ** 输出列表
@@ -7,13 +7,11 @@ module state_control(opendoor,mv2nxt,state,position,clk,switch,eff_req,ud_mode,e
 ** mv2nxt(mv2nxt)         : 移动指令  move to next floor
 ** state(state)           : 运行状态
 ** position(position)     : 电梯所在位置
-** ud_mode(ud_mode)       : 运行模式
 ** 输入列表
 ** clk(clk32Hz)           : 时钟(高频时钟)
 ** switch(switch)         : 电梯总开关
-** allReq_reg(allReq_reg) : 当前有效请求
-** up_need(up_need)       : 上升需求
-** down_need(down_need)   : 下降需求
+** eff_req                : 当前有效请求
+** ud_mode(ud_mode)       : 运行模式
 ** endRun(endRun)         : 移动完毕
 ** endOpen(endOpen)       : 开门完毕
 */
