@@ -1,6 +1,6 @@
 // 状态控制模块
 // state_control state_control0(opendoor,mv2nxt,state,position,clk32Hz,switch,eff_req,ud_mode,endRun,endOpen)
-module state_control(opendoor,mv2nxt,state,position,clk,switch,eff_req,ud_mode,endRun,endOpen);
+module state_control(opendoor,mv2nxt,position,clk,switch,eff_req,ud_mode,endRun,endOpen);
 /*
 ** 输出列表
 ** opendoor(opendoor)     : 开门指令
@@ -10,7 +10,7 @@ module state_control(opendoor,mv2nxt,state,position,clk,switch,eff_req,ud_mode,e
 ** 输入列表
 ** clk(clk32Hz)           : 时钟(高频时钟)
 ** switch(switch)         : 电梯总开关
-** eff_req                : 当前有效请求
+** eff_req                : 当前有效梯内请求
 ** ud_mode(ud_mode)       : 运行模式
 ** endRun(endRun)         : 移动完毕
 ** endOpen(endOpen)       : 开门完毕
@@ -18,9 +18,9 @@ module state_control(opendoor,mv2nxt,state,position,clk,switch,eff_req,ud_mode,e
 input clk,switch,endRun,endOpen;
 input [3:0] eff_req;
 input [1:0] ud_mode;
-output reg [2:0] state;           //000_stop,001_pause,010_move
 output reg [3:0] position;
 output reg opendoor,mv2nxt;
+reg [2:0] state;           //000_stop,001_pause,010_move
 
 always @(posedge clk)
     begin

@@ -19,7 +19,6 @@ always @(dispStage)
 
 endmodule
 
-// 电梯所在楼层指示灯
 module disp_floor(floorNum,position);
 /*
 ** 输出列表
@@ -36,6 +35,20 @@ always @(position)
 		4'b0010: floorNum = 7'b1101101;
 		4'b0100: floorNum = 7'b1111001;
 		4'b1000: floorNum = 7'b0110011;
+    endcase
+
+endmodule
+
+
+module disp_mode(ud_mode,dispMode);
+input [1:0] ud_mode;
+output reg[1:0]dispMode;
+
+always @(ud_mode)
+	case(ud_mode)
+		2'b00: dispMode = 2'b00;
+		2'b01: dispMode = 2'b0z;
+		2'b10: dispMode = 2'bz0;
     endcase
 
 endmodule

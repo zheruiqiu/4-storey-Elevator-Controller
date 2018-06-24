@@ -36,7 +36,7 @@ module counter_run(endRun,CP,CP_H,StRun);
 endmodule
 
 // 开门计时器
-// counter_open open_Timer(dispStage,endOpen,clk4hz,opendoor,pause,close);
+// counter_open open_Timer(endOpen,dispStage,clk4hz,opendoor,pause,close);
 module counter_open(endOpen,dispStage,CP,StOpen,pause,close);
 /*
 ** 输出列表
