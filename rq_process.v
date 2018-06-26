@@ -1,6 +1,6 @@
 // 请求处理模块
 // rq_process rq_process0(eff_req,ud_mode,clk32hz,upReq,downReq,inEleReq,position)
-module rq_process(eff_req,ud_mode,clk,upReq,downReq,inEleReq,position);
+module rq_process(eff_req,ud_mode,upReq_reg,downReq_reg,hst_down,clk,upReq,downReq,inEleReq,position);
 /*
 ** 输出列表
 ** eff_req      : 当前有效梯内请求
@@ -16,11 +16,11 @@ input clk;
 input [3:0] upReq,downReq,inEleReq,position;
 output reg [1:0] ud_mode; //00_no require,01_up mode,10_down mode
 output reg [3:0] eff_req;
-reg [3:0] upReq_reg=4'd0;
-reg [3:0] downReq_reg=4'd0;
+output reg [3:0] upReq_reg=4'd0;
+output reg [3:0] downReq_reg=4'd0;
 reg [3:0] inEleReq_reg=4'd0;
 reg [3:0] allReq_reg;
-reg [3:0] hst_down;
+output reg [3:0] hst_down;
 reg [3:0] lst_up;
 
 always @(posedge clk)         // 上升沿触发
@@ -53,10 +53,11 @@ always @(posedge clk)         // 上升沿触发
 			if (position==hst_down && hst_down>upReq_reg) 
 			begin				
 				downReq_reg  = downReq_reg & (~position);
+				eff_req = eff_req & (~position);
 				ud_mode=2'b00;
 			end
 			eff_req = ((~(position-4'b0001)) & (upReq_reg | inEleReq_reg));
-			if (hst_down>upReq_reg) eff_req = hst_down | eff_req;
+			if (hst_down>upReq_reg) eff_req = (hst_down | eff_req) & (~position);
 			if (eff_req != 4'b0000) ud_mode = 2'b01;
 			else ud_mode = 2'b00;
 		end
@@ -67,12 +68,13 @@ always @(posedge clk)         // 上升沿触发
 			if (position==lst_up && (lst_up<downReq_reg || downReq_reg==4'b0000))
 			begin
 				upReq_reg = upReq_reg & (~position);
+				eff_req = eff_req & (~position);
 				ud_mode=2'b00;
 			end
 			else
 			begin
 				eff_req = ((position-4'b0001) & (downReq_reg | inEleReq_reg));
-				if (lst_up<downReq_reg || downReq_reg==4'b0000) eff_req = lst_up | eff_req;
+				if (lst_up<downReq_reg || downReq_reg==4'b0000) eff_req = (lst_up | eff_req) & (~position);
 				if (eff_req != 4'b0000) ud_mode = 2'b10;
 				else ud_mode = 2'b00;
 			end
