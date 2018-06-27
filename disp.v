@@ -46,7 +46,7 @@ output reg[1:0]dispMode;
 
 always @(ud_mode)
 	case(ud_mode)
-		2'b00: dispMode = 2'b00;
+		2'b00: dispMode = 2'bzz;
 		2'b01: dispMode = 2'b0z;
 		2'b10: dispMode = 2'bz0;
     endcase
