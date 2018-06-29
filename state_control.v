@@ -1,6 +1,6 @@
 // 状态控制模块
 // state_control state_control0(opendoor,mv2nxt,state,position,clk32Hz,switch,eff_req,ud_mode,endRun,endOpen)
-module state_control(opendoor,mv2nxt,position,clk,switch,eff_req,ud_mode,endRun,endOpen);
+module state_control(opendoor,mv2nxt,position,clk,switch,eff_req,ud_mode,endRun,endOpen,upReq,downReq);
 /*
 ** 输出列表
 ** opendoor(opendoor)     : 开门指令
@@ -16,7 +16,7 @@ module state_control(opendoor,mv2nxt,position,clk,switch,eff_req,ud_mode,endRun,
 ** endOpen(endOpen)       : 开门完毕
 */
 input clk,switch,endRun,endOpen;
-input [3:0] eff_req;
+input [3:0] eff_req,upReq,downReq;
 input [1:0] ud_mode;
 output reg [3:0] position;
 output reg opendoor,mv2nxt;
@@ -37,7 +37,9 @@ always @(posedge clk)
             3'b000:state[2:0]=3'b001;                      // 总开关开启后，电梯进入暂停状态
             3'b001:                                        // 电梯处于暂停状态时
             begin
-                if(|(eff_req & position)==1)            // 如果此层需要停靠
+                //if((|(position & (upReq|downReq))==1)||(|(eff_req & position)==1))
+                //if(|(eff_req & position)==1)  
+                if((|(position & (upReq|downReq))==1)||(|(eff_req & position)==1))          // 如果此层需要停靠
                 begin
                     opendoor=1'b1;                         // 开门计时开始
                 end
